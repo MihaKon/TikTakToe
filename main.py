@@ -3,13 +3,21 @@ import sqlite3
 
 def connect_to_db():
     con = sqlite3.connect("players.db")
-    cur = con.cursor()
-    cur.execute("CREATE TABLE IF NOT EXISTS players(name, W, L, D)")
-    return cur
+    cur_t = con.cursor()
+    cur_t.execute("CREATE TABLE IF NOT EXISTS players(name, W, L, D)")
+    return cur_t
 
 
-def insert_player_into_db(players,cur):
-    pass
+def check_player_in_db(name, cur_t):
+    result = cur_t.execute(f"SELECT name FROM players WHERE name='{name}'")
+    if result.fetchone() is None:
+        insert_player_into_db(name, cur_t)
+    else:
+        print(result.fetchone())
+
+
+def insert_player_into_db(name, cur_t):
+    cur_t.execute(f"INSERT INTO players VALUES ('{name}',0,0,0)")
 
 
 def check_board_horizontal(board):
@@ -17,7 +25,6 @@ def check_board_horizontal(board):
     Checks current state of playing board horizontally.
 
     :param board: Current state of playing board
-    :return board[i]: sign X or O of the winner from wining line
     """
     for i in range(0, 8, 3):
         if board[i] == board[i + 1] == board[i + 2]:
@@ -122,6 +129,23 @@ def get_clear_board():
 
 
 def play(players_t):
+    """
+    This function appears to be implementing the gameplay of a tic-tac-toe game. The game is played on a playing
+    board represented by a list, which is initialized with a clear board (presumably all entries are empty) in each
+    iteration of the outer while loop. The game is played by two players, and the turn of each player is tracked by
+    the turn variable, which is incremented at the end of each player's turn. The players are stored in a list
+    players_t, and the current player is selected using the turn % len(players_t) expression. In each turn,
+    the function first retrieves the current playing board, then calls the check_user_input function to get the move
+    of the current player. The selected position on the board is then marked with the current player's marker,
+    either 'X' or 'O', which is stored in the marker variable. The game continues until the is_game_finished function
+    returns True, which indicates that either one of the players has won or the game has ended in a draw. At the end
+    of the game, the winner is determined by calling the get_winner function and is reported to the user with a
+    message. If the winner is 'X', the message reports that player one, represented by the player_one_x variable,
+    has won. If the winner is 'O', the message reports that player two, represented by the player_two_o variable,
+    has won. If the winner is neither 'X' nor 'O', the message reports a draw.
+
+    :param players_t: [NAME_OF_THE_PLAYER_ONE, HIS_SIGN, NAME_OF_THE_PLAYER_TWO, HIS_SIGN,]
+    """
     while True:
         playing_board = get_clear_board()
         turn = 0
@@ -143,8 +167,11 @@ def play(players_t):
 
 
 if __name__ == "__main__":
+    cur = connect_to_db()
     player_one_x = input("Name of the player 1(x): ")
+    check_player_in_db(player_one_x, cur)
     player_two_o = input("Name of the player 2(0): ")
+    check_player_in_db(player_two_o, cur)
 
     players = [(player_one_x, "X"), (player_two_o, "O")]
     play(players)
