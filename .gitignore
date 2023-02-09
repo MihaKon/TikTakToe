@@ -1,2 +1,4 @@
 venv
 exportToHTML
+/players.db
+/players.db-journal

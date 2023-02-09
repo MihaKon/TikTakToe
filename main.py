@@ -2,22 +2,54 @@ import sqlite3
 
 
 def connect_to_db():
-    con = sqlite3.connect("players.db")
-    cur_t = con.cursor()
+    """
+    This code fragment is creating a database connection and initializing a database cursor to interact with an
+    SQLite database.
+
+    :return cur_t: cursor object
+    :return con_t: connection object
+    """
+    con_t = sqlite3.connect("players.db")
+    cur_t = con_t.cursor()
     cur_t.execute("CREATE TABLE IF NOT EXISTS players(name, W, L, D)")
-    return cur_t
+    return cur_t, con_t
 
 
-def check_player_in_db(name, cur_t):
-    result = cur_t.execute(f"SELECT name FROM players WHERE name='{name}'")
-    if result.fetchone() is None:
-        insert_player_into_db(name, cur_t)
+def check_player_in_db(name, cur_t, con_t):
+    """
+    This code fragment is checking whether a player with a given name exists in a database.
+    
+    :param name: string, name of the player
+    :param cur_t: cursor object to DB
+    :param con_t: connection object to DB
+    """
+    result_t = cur_t.execute(f"SELECT name FROM players WHERE name='{name}'")
+    if result_t.fetchone():
+        print("Name exists")
     else:
-        print(result.fetchone())
+        insert_player_into_db(name, cur_t, con_t)
 
 
-def insert_player_into_db(name, cur_t):
+def insert_player_into_db(name, cur_t, con_t):
+    """
+    This code fragment inserts a new player into the 'players' table in an SQLite database.
+    :param name:
+    :param cur_t:
+    :param con_t:
+    """
     cur_t.execute(f"INSERT INTO players VALUES ('{name}',0,0,0)")
+    con_t.commit()
+
+
+def display_db(cur_t):
+    """
+    Displays content of selected dB.
+
+    :param cur_t: object cursor pointing at dB
+    :return:
+    """
+    for row in cur_t.execute("SELECT * FROM players"):
+        print(row)
 
 
 def check_board_horizontal(board):
@@ -130,19 +162,7 @@ def get_clear_board():
 
 def play(players_t):
     """
-    This function appears to be implementing the gameplay of a tic-tac-toe game. The game is played on a playing
-    board represented by a list, which is initialized with a clear board (presumably all entries are empty) in each
-    iteration of the outer while loop. The game is played by two players, and the turn of each player is tracked by
-    the turn variable, which is incremented at the end of each player's turn. The players are stored in a list
-    players_t, and the current player is selected using the turn % len(players_t) expression. In each turn,
-    the function first retrieves the current playing board, then calls the check_user_input function to get the move
-    of the current player. The selected position on the board is then marked with the current player's marker,
-    either 'X' or 'O', which is stored in the marker variable. The game continues until the is_game_finished function
-    returns True, which indicates that either one of the players has won or the game has ended in a draw. At the end
-    of the game, the winner is determined by calling the get_winner function and is reported to the user with a
-    message. If the winner is 'X', the message reports that player one, represented by the player_one_x variable,
-    has won. If the winner is 'O', the message reports that player two, represented by the player_two_o variable,
-    has won. If the winner is neither 'X' nor 'O', the message reports a draw.
+    This function appears to be implementing the gameplay of a tic-tac-toe game. 
 
     :param players_t: [NAME_OF_THE_PLAYER_ONE, HIS_SIGN, NAME_OF_THE_PLAYER_TWO, HIS_SIGN,]
     """
@@ -167,11 +187,12 @@ def play(players_t):
 
 
 if __name__ == "__main__":
-    cur = connect_to_db()
+    cur, con = connect_to_db()
+
     player_one_x = input("Name of the player 1(x): ")
-    check_player_in_db(player_one_x, cur)
+    check_player_in_db(player_one_x, cur, con)
     player_two_o = input("Name of the player 2(0): ")
-    check_player_in_db(player_two_o, cur)
+    check_player_in_db(player_two_o, cur, con)
 
     players = [(player_one_x, "X"), (player_two_o, "O")]
     play(players)
