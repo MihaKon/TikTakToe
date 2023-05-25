@@ -42,7 +42,7 @@ class Player:
         for row in self.cur.execute(f"SELECT * FROM players WHERE name ='{self.name}'"):
             print(row)
 
-    def uddate_player_score_in_db(self, letter):
+    def update_player_score_in_db(self, letter):
         """
         Increment score by one in selected table.
         :param letter: W - Wins | L - Loses | D - Draws
@@ -179,16 +179,16 @@ def play(players_t):
         winner = get_winner(playing_board)
         if winner == 'X':
             print(player_one_x.upper(), ' WON!')
-            player_one.uddate_player_score_in_db('W')
-            player_two.uddate_player_score_in_db('L')
+            player_one.update_player_score_in_db('W')
+            player_two.update_player_score_in_db('L')
         elif winner == 'O':
             print(player_two_o.upper(), ' WON!')
-            player_one.uddate_player_score_in_db('L')
-            player_two.uddate_player_score_in_db('W')
+            player_one.update_player_score_in_db('L')
+            player_two.update_player_score_in_db('W')
         else:
             print('DRAW!')
-            player_one.uddate_player_score_in_db('D')
-            player_two.uddate_player_score_in_db('D')
+            player_one.update_player_score_in_db('D')
+            player_two.update_player_score_in_db('D')
 
         player_one.display_db()
         player_two.display_db()
