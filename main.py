@@ -1,55 +1,54 @@
 import sqlite3
 
 
-def connect_to_db():
-    """
-    This code fragment is creating a database connection and initializing a database cursor to interact with an
-    SQLite database.
+class Player:
+    def __init__(self, name):
+        self.conn, self.cur = None, None
+        self.name = name
+        self.connect_to_db()
+        self.check_player_in_db()
 
-    :return cur_t: cursor object
-    :return con_t: connection object
-    """
-    con_t = sqlite3.connect("players.db")
-    cur_t = con_t.cursor()
-    cur_t.execute("CREATE TABLE IF NOT EXISTS players(name, W, L, D)")
-    return cur_t, con_t
+    def connect_to_db(self):
+        """
+        This code fragment is creating a database connection and initializing a database cursor to interact with an
+        SQLite database.
+        """
+        self.conn = sqlite3.connect("players.db")
+        self.cur = self.conn.cursor()
+        self.cur.execute("CREATE TABLE IF NOT EXISTS players(name, W, L, D)")
 
+    def insert_player_into_db(self):
+        """
+        This code fragment inserts a new player into the 'players' table in an SQLite database.
+        """
+        self.cur.execute(f"INSERT INTO players VALUES ('{self.name}',0,0,0)")
+        self.conn.commit()
 
-def check_player_in_db(name, cur_t, con_t):
-    """
-    This code fragment is checking whether a player with a given name exists in a database.
-    
-    :param name: string, name of the player
-    :param cur_t: cursor object to DB
-    :param con_t: connection object to DB
-    """
-    result_t = cur_t.execute(f"SELECT name FROM players WHERE name='{name}'")
-    if result_t.fetchone():
-        print("Name exists")
-    else:
-        insert_player_into_db(name, cur_t, con_t)
+    def check_player_in_db(self):
+        """
+        Checks whether a player with a given name exists in a database.
+        """
+        result_t = self.cur.execute(f"SELECT name FROM players WHERE name='{self.name}'")
+        if result_t.fetchone():
+            print("Name exists")
+        else:
+            Player.insert_player_into_db(self)
+            print("Player created")
 
+    def display_db(self):
+        """
+        Displays content of selected dB.
+        """
+        for row in self.cur.execute(f"SELECT * FROM players WHERE name ='{self.name}'"):
+            print(row)
 
-def insert_player_into_db(name, cur_t, con_t):
-    """
-    This code fragment inserts a new player into the 'players' table in an SQLite database.
-    :param name:
-    :param cur_t:
-    :param con_t:
-    """
-    cur_t.execute(f"INSERT INTO players VALUES ('{name}',0,0,0)")
-    con_t.commit()
-
-
-def display_db(cur_t):
-    """
-    Displays content of selected dB.
-
-    :param cur_t: object cursor pointing at dB
-    :return:
-    """
-    for row in cur_t.execute("SELECT * FROM players"):
-        print(row)
+    def uddate_player_score_in_db(self, letter):
+        """
+        Increment score by one in selected table.
+        :param letter: W - Wins | L - Loses | D - Draws
+        """
+        self.cur.execute(f"UPDATE players SET {letter} = {letter}+1 WHERE name='{self.name}'")
+        self.conn.commit()
 
 
 def check_board_horizontal(board):
@@ -180,19 +179,25 @@ def play(players_t):
         winner = get_winner(playing_board)
         if winner == 'X':
             print(player_one_x.upper(), ' WON!')
+            player_one.uddate_player_score_in_db('W')
+            player_two.uddate_player_score_in_db('L')
         elif winner == 'O':
             print(player_two_o.upper(), ' WON!')
+            player_one.uddate_player_score_in_db('L')
+            player_two.uddate_player_score_in_db('W')
         else:
             print('DRAW!')
+            player_one.uddate_player_score_in_db('D')
+            player_two.uddate_player_score_in_db('D')
+
+        player_one.display_db()
+        player_two.display_db()
 
 
 if __name__ == "__main__":
-    cur, con = connect_to_db()
-
     player_one_x = input("Name of the player 1(x): ")
-    check_player_in_db(player_one_x, cur, con)
+    player_one = Player(player_one_x)
     player_two_o = input("Name of the player 2(0): ")
-    check_player_in_db(player_two_o, cur, con)
-
+    player_two = Player(player_two_o)
     players = [(player_one_x, "X"), (player_two_o, "O")]
     play(players)
