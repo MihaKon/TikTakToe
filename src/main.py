@@ -1,57 +1,7 @@
-import sqlite3
+from player import Player
 
 
-class Player:
-    def __init__(self, name):
-        self.conn, self.cur = None, None
-        self.name = name
-        self.connect_to_db()
-        self.check_player_in_db()
-
-    def connect_to_db(self):
-        """
-        This code fragment is creating a database connection and initializing a database cursor to interact with an
-        SQLite database.
-        """
-        self.conn = sqlite3.connect("players.db")
-        self.cur = self.conn.cursor()
-        self.cur.execute("CREATE TABLE IF NOT EXISTS players(name, W, L, D)")
-
-    def insert_player_into_db(self):
-        """
-        This code fragment inserts a new player into the 'players' table in an SQLite database.
-        """
-        self.cur.execute(f"INSERT INTO players VALUES ('{self.name}',0,0,0)")
-        self.conn.commit()
-
-    def check_player_in_db(self):
-        """
-        Checks whether a player with a given name exists in a database.
-        """
-        result_t = self.cur.execute(f"SELECT name FROM players WHERE name='{self.name}'")
-        if result_t.fetchone():
-            print("Name exists")
-        else:
-            Player.insert_player_into_db(self)
-            print("Player created")
-
-    def display_db(self):
-        """
-        Displays content of selected dB.
-        """
-        for row in self.cur.execute(f"SELECT * FROM players WHERE name ='{self.name}'"):
-            print(row)
-
-    def update_player_score_in_db(self, letter):
-        """
-        Increment score by one in selected table.
-        :param letter: W - Wins | L - Loses | D - Draws
-        """
-        self.cur.execute(f"UPDATE players SET {letter} = {letter}+1 WHERE name='{self.name}'")
-        self.conn.commit()
-
-
-def check_board_horizontal(board):
+def check_board_horizontal(board: list) -> str:
     """
     Checks current state of playing board horizontally.
 
@@ -62,7 +12,7 @@ def check_board_horizontal(board):
             return board[i]
 
 
-def check_board_vertical(board):
+def check_board_vertical(board: list) -> str:
     """
     Checks current state of playing board vertically.
 
@@ -74,7 +24,7 @@ def check_board_vertical(board):
             return board[i]
 
 
-def check_board_across(board):
+def check_board_across(board: list) -> str:
     """
     Checks current state of playing board across.
 
@@ -87,7 +37,7 @@ def check_board_across(board):
         return board[2]
 
 
-def get_winner(board):
+def get_winner(board: list) -> str:
     """
     Checks which line won
 
@@ -107,7 +57,7 @@ def get_winner(board):
     return 'DRAW'
 
 
-def is_game_finished(board):
+def is_game_finished(board: list) -> bool:
     """
     Checks if the game has finished based on the current state of the board.
 
@@ -120,7 +70,7 @@ def is_game_finished(board):
     return all([number != board_entry for number, board_entry in zip(range(1, 10), board)])
 
 
-def check_user_input(name, board):
+def check_user_input(name: str, board: list) -> int:
     """
     Checks users input.
 
@@ -139,7 +89,7 @@ def check_user_input(name, board):
             print("Wrong input!")
 
 
-def get_playing_board(board):
+def get_playing_board(board: list):
     """
     Displays current state of the playing board.
 
@@ -152,14 +102,14 @@ def get_playing_board(board):
     print(board[6], '|', board[7], '|', board[8])
 
 
-def get_clear_board():
+def get_clear_board() -> List[int]:
     """
     :return: Array [1-9]
     """
     return [*range(1, 10)]
 
 
-def play(players_t):
+def play(players_t: List[Tuple[str, str]]):
     """
     This function appears to be implementing the gameplay of a tic-tac-toe game. 
 
@@ -179,19 +129,16 @@ def play(players_t):
         winner = get_winner(playing_board)
         if winner == 'X':
             print(player_one_x.upper(), ' WON!')
-            player_one.update_player_score_in_db('W')
-            player_two.update_player_score_in_db('L')
+            player_one.update_player_score('W')
+            player_two.update_player_score('L')
         elif winner == 'O':
             print(player_two_o.upper(), ' WON!')
-            player_one.update_player_score_in_db('L')
-            player_two.update_player_score_in_db('W')
+            player_one.update_player_score('L')
+            player_two.update_player_score('W')
         else:
             print('DRAW!')
-            player_one.update_player_score_in_db('D')
-            player_two.update_player_score_in_db('D')
-
-        player_one.display_db()
-        player_two.display_db()
+            player_one.update_player_score('D')
+            player_two.update_player_score('D')
 
 
 if __name__ == "__main__":
