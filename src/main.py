@@ -127,6 +127,7 @@ def play(players_t: List[Tuple[str, str]]):
             turn += 1
 
         winner = get_winner(playing_board)
+        #TODO: insert class into functions or create dbmanager in player.py
         if winner == 'X':
             print(player_one_x.upper(), ' WON!')
             player_one.update_player_score('W')
